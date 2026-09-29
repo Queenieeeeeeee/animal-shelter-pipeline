@@ -1,0 +1,46 @@
+name: Daily Petfinder snapshot
+
+on:
+  schedule:
+    # 11:17 UTC = 04:17 Phoenix time (Arizona does not observe DST).
+    # An odd minute is deliberate: GitHub queues cron jobs on the hour, so
+    # runs scheduled at :00 are the ones that get delayed or dropped.
+    - cron: "17 11 * * *"
+  workflow_dispatch:        # lets you trigger a run by hand from the Actions tab
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # required to commit the new data file back
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Pull today's snapshot
+        env:
+          PETFINDER_KEY: ${{ secrets.PETFINDER_KEY }}
+          PETFINDER_SECRET: ${{ secrets.PETFINDER_SECRET }}
+        run: python pull.py
+
+      - name: Commit the snapshot
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/raw/
+          # Nothing to commit is not an error -- it just means today's file
+          # was identical to what is already tracked.
+          if git diff --staged --quiet; then
+            echo "No new data to commit."
+          else
+            git commit -m "data: snapshot $(date -u +%Y-%m-%d)"
+            git push
+          fi
