@@ -1,0 +1,43 @@
+# Source registry.
+#
+# Every source is a Socrata dataset: open data, no API key, one JSON endpoint.
+# Adding a shelter means adding an entry here -- the extractor reads this file
+# and needs no code change.
+#
+# `watermark` is the column used for incremental pulls. On each run the
+# extractor asks the API only for rows newer than the newest row already held
+# locally, so a monthly refresh moves a few thousand rows rather than re-pulling
+# the full history.
+#
+# Field names deliberately differ between shelters (animal_type vs type,
+# animal_breed vs breed). They are NOT renamed here. Raw stays raw; the
+# reconciliation belongs in the staging models downstream, where it is visible
+# and testable.
+
+sources:
+  - name: dallas_current
+    shelter: Dallas Animal Services
+    city: Dallas
+    state: TX
+    domain: www.dallasopendata.com
+    dataset_id: uyte-zi7f
+    description: Dallas Animal Shelter Data, fiscal years 2023-2026. Refreshed daily.
+    watermark: intake_date
+
+  - name: dallas_historical
+    shelter: Dallas Animal Services
+    city: Dallas
+    state: TX
+    domain: www.dallasopendata.com
+    dataset_id: f77p-sgrc
+    description: Dallas Animal Shelter Data, fiscal years 2022-2023. Earlier years, same schema.
+    watermark: intake_date
+
+  - name: sonoma
+    shelter: Sonoma County Animal Services
+    city: Santa Rosa
+    state: CA
+    domain: data.sonomacounty.ca.gov
+    dataset_id: 924a-vesw
+    description: Sonoma County Animal Shelter intake and outcome records. Refreshed daily.
+    watermark: intake_date
