@@ -2,19 +2,25 @@ name: Refresh shelter data
 
 on:
   schedule:
-    - cron: "23 11 1 * *"
+    - cron: "23 11 1 * *"     # 1st of each month, 11:23 UTC
   workflow_dispatch:
     inputs:
-      full_refresh:
-        description: "Re-pull every source from the beginning"
+      allow_shrink:
+        description: "Accept a snapshot smaller than the previous one"
         type: boolean
         default: false
+
+permissions:
+  contents: write             # lets the job commit new snapshots back to the repo
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v5
@@ -26,22 +32,22 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Extract
+      - name: Extract full snapshot
         run: |
-          if [ "${{ inputs.full_refresh }}" = "true" ]; then
-            python extract.py --full-refresh
+          if [ "${{ inputs.allow_shrink }}" = "true" ]; then
+            python extract.py --allow-shrink
           else
             python extract.py
           fi
 
-      - name: Commit new data
+      - name: Commit new snapshot
         run: |
           git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add data/raw/
           if git diff --staged --quiet; then
-            echo "No new records."
+            echo "No changes."
           else
-            git commit -m "data: refresh $(date -u +%Y-%m-%d)"
+            git commit -m "data: snapshot $(date -u +%Y-%m-%d)"
             git push
           fi
