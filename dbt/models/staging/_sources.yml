@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Untransformed snapshots loaded by load.py. Every column is STRING except _snapshot_date.
+    schema: raw
+    tables:
+      - name: sonoma
+        description: Sonoma County Animal Services intake and outcome records, one row per impound per snapshot.
+      - name: dallas_current
+        description: Dallas Animal Services, fiscal years 2023 onward.
+      - name: dallas_historical
+        description: Dallas Animal Services, fiscal years 2022-2023.
