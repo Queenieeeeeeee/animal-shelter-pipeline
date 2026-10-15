@@ -1,5 +1,20 @@
+# Python
 __pycache__/
 *.pyc
 .venv/
 venv/
+
+# Credentials: a Google Cloud key must never be committed
 .env
+*service-account*.json
+*-key.json
+animal-shelter-pipeline-*.json
+
+# dbt (stage 3)
+target/
+dbt_packages/
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
