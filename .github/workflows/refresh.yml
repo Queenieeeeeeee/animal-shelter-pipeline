@@ -5,6 +5,10 @@ on:
     - cron: "23 11 1 * *"     # 1st of each month, 11:23 UTC
   workflow_dispatch:
     inputs:
+      skip_extract:
+        description: "Only reload BigQuery from the snapshots already in the repo"
+        type: boolean
+        default: false
       allow_shrink:
         description: "Accept a snapshot smaller than the previous one"
         type: boolean
@@ -16,6 +20,9 @@ permissions:
 concurrency:
   group: refresh
   cancel-in-progress: false
+
+env:
+  GCP_PROJECT: animal-shelter-pipeline
 
 jobs:
   refresh:
@@ -33,6 +40,7 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: Extract full snapshot
+        if: ${{ !inputs.skip_extract }}
         run: |
           if [ "${{ inputs.allow_shrink }}" = "true" ]; then
             python extract.py --allow-shrink
@@ -41,6 +49,7 @@ jobs:
           fi
 
       - name: Commit new snapshot
+        if: ${{ !inputs.skip_extract }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
@@ -51,3 +60,13 @@ jobs:
             git commit -m "data: snapshot $(date -u +%Y-%m-%d)"
             git push
           fi
+
+      # Signs in to Google Cloud as the github-actions-loader service account,
+      # using the key stored in the GCP_SA_KEY repository secret.
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Load into BigQuery
+        run: python load.py
