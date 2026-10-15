@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: stg_sonoma__intakes
+    description: Sonoma intakes and outcomes, one row per impound per snapshot, typed and lowercased.
+    columns:
+      - name: snapshot_record_id
+        description: Primary key. An impound appears once in every snapshot taken after it happened.
+        data_tests:
+          - unique
+          - not_null
+      - name: intake_id
+        description: Sonoma impound number. One per stay; an animal can have several.
+        data_tests:
+          - not_null
+      - name: animal_id
+        description: Sonoma animal id. Repeats when the same animal returns to the shelter.
+        data_tests:
+          - not_null
+      - name: intake_date
+        data_tests:
+          - not_null
+      - name: official_days_in_shelter
+        description: Length of stay as published by Sonoma. Used to validate the derived metric.
