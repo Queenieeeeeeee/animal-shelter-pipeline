@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_dallas__intakes
+    description: >
+      One row per Dallas shelter stay (impound_number), combining the current
+      and historical datasets from their latest snapshots. Implausible dates are
+      flagged, not removed.
+    columns:
+      - name: impound_number
+        description: Unique per intake. Primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: animal_id
+        description: Animal identifier. Repeats when the same animal is re-admitted.
+        data_tests:
+          - not_null
+      - name: source_table
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['dallas_current', 'dallas_historical']
+      - name: is_intake_date_implausible
+        description: Intake date missing, before 2010, or after the snapshot date (e.g. 2920-05-05).
+        data_tests:
+          - not_null
+      - name: is_outcome_before_intake
+        description: Outcome date earlier than intake date, usually caused by a mistyped intake year.
+        data_tests:
+          - not_null
+      - name: record_type
+        description: >
+          shelter_stay, lost_found_report (online reports, intake_subtype = web),
+          or resource_request (intake_type = resource). Only shelter_stay rows
+          belong in length-of-stay metrics.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['shelter_stay', 'lost_found_report', 'resource_request']
+      - name: impound_prefix_year
+        description: >
+          Year encoded in impound_number. Matches intake year 99.4% of the time;
+          mismatches follow year-boundary patterns, so not used as a quality rule.
+      
