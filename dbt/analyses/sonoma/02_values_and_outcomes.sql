@@ -38,8 +38,6 @@ select
     count(*)                      as total_rows,
     countif(outcome_date is null) as no_outcome_date
 from {{ ref('stg_sonoma__intakes') }}
-where snapshot_date = (select max(snapshot_date) from {{ ref('stg_sonoma__intakes') }});
-
 
 -- -----------------------------------------------------------------------------
 -- Q3. What outcome types exist?
@@ -56,6 +54,5 @@ where snapshot_date = (select max(snapshot_date) from {{ ref('stg_sonoma__intake
 -- -----------------------------------------------------------------------------
 select outcome_type, count(*) as row_count
 from {{ ref('stg_sonoma__intakes') }}
-where snapshot_date = (select max(snapshot_date) from {{ ref('stg_sonoma__intakes') }})
 group by 1
 order by row_count desc;

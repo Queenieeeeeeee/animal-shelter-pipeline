@@ -33,16 +33,20 @@ from latest;
 
 
 -- -----------------------------------------------------------------------------
--- Q2. How many snapshots does the staging model hold, and how many rows each?
+-- Q2. How many snapshots does raw hold, and does staging keep all of them?
 --
--- stg_sonoma__intakes keeps EVERY snapshot (one row per impound per snapshot),
--- so intake_id alone is not unique there. The primary key is
--- snapshot_record_id = intake_id | snapshot_date.
--- Result: not recorded at the time. Run before relying on snapshot counts.
+-- Run: 2026-10-19
+-- Result (raw):
+--   2026-10-01  34,388
+--   2026-10-14  34,492
+--   stg_sonoma__intakes held both snapshots (68,880 rows), so any count taken
+--   on staging without a snapshot filter was roughly doubled. Found when
+--   outcome counts came out ~2x the figures recorded on 2026-10-15.
+-- Decision: staging keeps the latest snapshot only, matching Dallas.
+--           Earlier snapshots stay in raw and feed the SCD2 model later.
+--           After the fix: stg_sonoma__intakes = 34,492 rows.
 -- -----------------------------------------------------------------------------
-select snapshot_date,
-       count(*)                  as row_count,
-       count(distinct intake_id) as distinct_intakes
-from {{ ref('stg_sonoma__intakes') }}
+select _snapshot_date, count(*) as row_count
+from {{ source('raw', 'sonoma') }}
 group by 1
 order by 1;
