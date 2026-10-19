@@ -1,10 +1,12 @@
--- One row per impound per snapshot.
+-- One row per impound (latest snapshot only).
+-- Earlier snapshots feed the SCD2 model later, read directly from raw.
 -- Renames to the shared vocabulary, casts types, lowercases codes.
 -- Nothing is filtered out: implausible dates are flagged, not removed.
 
 with source as (
 
     select * from {{ source('raw', 'sonoma') }}
+    qualify _snapshot_date = max(_snapshot_date) over ()
 
 ),
 
