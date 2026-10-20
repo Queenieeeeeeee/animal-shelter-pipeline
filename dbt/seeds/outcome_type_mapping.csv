@@ -1,0 +1,28 @@
+source,raw_outcome_type,outcome_group,is_live_outcome,is_final_outcome,notes
+dallas,adoption,adoption,true,true,
+dallas,returned to owner,return_to_owner,true,true,
+dallas,transfer,transfer,true,true,
+dallas,tnr,return_to_field,true,true,Trap neuter return (community cats)
+dallas,snr,return_to_field,true,true,Shelter neuter return
+dallas,euthanized,euthanasia,false,true,
+dallas,died,died,false,true,
+dallas,missing,missing,false,true,Mostly lost while in foster (Q1)
+dallas,disposal,disposal,false,true,Body handling; 996 of 999 arrived dead (Q5a)
+dallas,foster,foster,,false,Temporary exit; returns as a new impound (Q2)
+dallas,treatment,treatment,,false,Clinic visit; avg 0.3 days (Q1)
+dallas,wildlife,wildlife,,true,Same-day handoff; not a shelter stay (Q1)
+dallas,other,other,,false,No outcome date; treated as open (Q5b)
+dallas,closed,not_applicable,,,Resource request only (record_type)
+dallas,lost exp,not_applicable,,,Lost report (record_type)
+dallas,found exp,not_applicable,,,Found report (record_type)
+sonoma,adoption,adoption,true,true,
+sonoma,return to owner,return_to_owner,true,true,
+sonoma,rtos,return_to_owner,true,true,Phone or counter reclaim (Q6)
+sonoma,vet,return_to_owner,true,true,All 'vet return to owner' (Q6)
+sonoma,transfer,transfer,true,true,
+sonoma,euthanize,euthanasia,false,true,
+sonoma,died,died,false,true,
+sonoma,escaped/stolen,missing,false,true,Lost from custody (Q6)
+sonoma,disposal,disposal,false,true,Body handling; mostly doa (Q6)
+sonoma,transport,disposal,false,true,Body sent for rabies test (Q6)
+sonoma,shelter,other,,false,Mostly hold expired; likely a status change (Q6)

@@ -1,0 +1,32 @@
+version: 2
+
+seeds:
+  - name: outcome_type_mapping
+    description: >
+      Maps each city's raw outcome_type to a shared outcome_group.
+      Decisions and evidence: analyses/shared/01_outcome_mapping.sql
+    data_tests:
+      - unique:
+          column_name: "concat(source, '|', raw_outcome_type)"
+    columns:
+      - name: source
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['dallas', 'sonoma']
+      - name: raw_outcome_type
+        data_tests:
+          - not_null
+      - name: outcome_group
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['adoption', 'return_to_owner', 'transfer', 'return_to_field',
+                       'euthanasia', 'died', 'missing', 'disposal', 'foster',
+                       'treatment', 'wildlife', 'other', 'not_applicable']
+      - name: is_live_outcome
+        description: Null when the outcome is not final or does not apply.
+      - name: is_final_outcome
+        description: False for temporary exits such as foster.
