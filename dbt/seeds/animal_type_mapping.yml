@@ -1,0 +1,29 @@
+version: 2
+
+seeds:
+  - name: animal_type_mapping
+    description: >
+      Maps each source's raw animal_type to a shared group (dog / cat / other).
+      Sonoma only publishes dog / cat / other, so that is the finest level both
+      cities share. Evidence: analyses/shared/02_animal_type_mapping.sql.
+    data_tests:
+      - unique:
+          arguments:
+            column_name: "source || '|' || raw_animal_type"
+    columns:
+      - name: source
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['dallas', 'sonoma']
+      - name: raw_animal_type
+        data_tests:
+          - not_null
+      - name: animal_type_group
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['dog', 'cat', 'other']
+      - name: notes

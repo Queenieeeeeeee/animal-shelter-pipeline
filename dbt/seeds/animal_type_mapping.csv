@@ -1,0 +1,9 @@
+source,raw_animal_type,animal_type_group,notes
+dallas,dog,dog,Q1
+dallas,cat,cat,Q1
+dallas,bird,other,Q3: 92% chicken + gamefowl; not pet birds
+dallas,wildlife,other,Q3: includes pets (rabbit / guinea pig / rat); type unreliable
+dallas,livestock,other,Q3: horse / pig / goat / sheep
+sonoma,dog,dog,Q1
+sonoma,cat,cat,Q1
+sonoma,other,other,Q3: union of Dallas bird + wildlife + livestock
