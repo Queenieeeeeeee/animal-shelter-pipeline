@@ -69,17 +69,24 @@ def endpoint(source: dict) -> str:
 
 
 def get_json(url: str, params: dict) -> list[dict]:
-    """GET with retries on rate limits and transient server errors."""
+    """GET with retries on timeouts, connection errors, rate limits and server errors."""
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
 
     for attempt in range(MAX_RETRIES):
-        resp = requests.get(url, params=params, headers=headers, timeout=REQUEST_TIMEOUT)
+        wait = 2 ** attempt * 5
+
+        try:
+            resp = requests.get(url, params=params, headers=headers, timeout=REQUEST_TIMEOUT)
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as exc:
+            print(f"    {type(exc).__name__}; retrying in {wait}s "
+                  f"({attempt + 1}/{MAX_RETRIES})")
+            time.sleep(wait)
+            continue
 
         if resp.status_code == 200:
             return resp.json()
 
         if resp.status_code == 429 or resp.status_code >= 500:
-            wait = 2 ** attempt * 5
             print(f"    HTTP {resp.status_code}; retrying in {wait}s "
                   f"({attempt + 1}/{MAX_RETRIES})")
             time.sleep(wait)
