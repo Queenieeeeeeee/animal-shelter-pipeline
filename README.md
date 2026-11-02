@@ -19,18 +19,19 @@ A single shelter's data answers "how are we doing". Two shelters answer "compare
 to whom" — which is the more useful question, and the harder engineering problem,
 because no two municipal portals publish the same shape of data.
 
-Dallas and Sonoma County both publish intake and outcome records. They agree on
-almost nothing else:
+Dallas and Sonoma County both publish intake and outcome records, but the column
+names, categories and level of detail differ:
 
 | | Dallas | Sonoma County |
 |---|---|---|
 | Animal type column | `animal_type` | `type` |
 | Breed column | `animal_breed` | `breed` |
-| Value casing | `DOG`, `STRAY`, `AMER SH` | `Dog`, `Stray`, `Domestic Shorthair` |
+| Animal type values | `DOG`, `CAT`, `BIRD`, `WILDLIFE`, `LIVESTOCK` | `DOG`, `CAT`, `OTHER` |
+| Intake type labels | `CONFISCATED`, `DISPOS REQ` | `CONFISCATE`, `OS APPT` |
 | Date and time | `intake_date` + `intake_time` (separate) | `intake_date` only |
 | Length of stay | must be derived | published as `days_in_shelter` |
-| Location | `kennel_number`, `impound_number` | `zip_code`, lat/long `location` |
-| Breed vocabulary | abbreviated (`CHIHUAHUA LH`) | spelled out (`Chihuahua, Long Haired`) |
+| Location | `council_district`, `census_tract` | `zip_code`, lat/long `location` |
+| Mixed breeds | a single `MIXED BREED` value | a `/MIX` suffix (`PIT BULL/MIX`) |
 
 Reconciling those into one model — one grain, one vocabulary, one definition of
 "adopted" — is the substance of this project. Sonoma publishing
@@ -65,7 +66,7 @@ personal machine.
 | Extraction (`extract.py` + GitHub Actions) | ✅ built |
 | Raw storage (`data/raw/`) | ✅ accumulating monthly snapshots |
 | Warehouse load (`load.py` → BigQuery) | ✅ built |
-| Transformation (dbt) | ⬜ planned |
+| Transformation (dbt) | 🟡 in progress: staging and type mappings built |
 | Dashboard (Power BI) | ⬜ planned |
 
 **Storage and compute are separate.** GitHub holds every raw snapshot
@@ -91,6 +92,7 @@ no longer be audited against its source.
 | `requirements.txt` | Python packages the scripts need. |
 | `.github/workflows/refresh.yml` | The monthly schedule: extract → commit the new snapshot to the repo → load into BigQuery. Can also be run by hand from the **Actions** tab. |
 | `.gitignore` | Keeps local environments, caches and credentials out of the repo. |
+| `dbt/` | The dbt project: staging models, tests, and the exploratory queries behind each modelling decision (`dbt/analyses/`). |
 | `data/raw/<source>/` | One gzipped NDJSON file per monthly snapshot, exactly as the API returned it. |
 
 ---
@@ -164,9 +166,10 @@ sandbox does not allow. The slowly changing dimension is instead derived with
 window functions over the stored monthly snapshots — a plain `SELECT` that dbt
 rebuilds from scratch each run.
 
-**Retries that distinguish causes.** Rate limits (429) and server errors (5xx)
-back off exponentially and retry. A 400 fails immediately — it means a malformed
-query, and no amount of retrying will fix that.
+**Retries that distinguish causes.** Timeouts, connection errors, rate limits
+(429) and server errors (5xx) back off exponentially and retry. A 400 fails
+immediately — it means a malformed query, and no amount of retrying will fix
+that.
 
 **Least-privilege credentials.** GitHub Actions signs in to Google Cloud as a
 dedicated service account holding only *BigQuery Data Editor* and *BigQuery Job
